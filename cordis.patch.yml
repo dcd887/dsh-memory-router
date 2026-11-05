@@ -1,0 +1,30 @@
+# 记忆路由：Host 插件一行即可。它不新增 MCP 行，
+# 因为它包住的是已有的 mcp-memory（serverName: memory），不改那个行。
+- insert:
+    - id: memory-router
+      name: '@local/dsh-memory-router'
+      config:
+        enabled: true
+        handoffDir: 'C:\Users\kjds\Desktop\DSH输出\_workflows'
+        handoffGlob: '交接_*.md'
+        stateChars: 1800
+        stateTtlMs: 600000
+        injectMode: context
+        injectOncePerTurn: true
+        trim:
+          enabled: true
+          dryRun: false
+          maxItems: 2
+          maxChars: 500
+          # 只裁「读」类工具。写类（create_entities / add_observations / delete_*）
+          # 的返回是确认回执，裁它没有意义，还可能让模型误判写没写成功。
+          toolPattern: '^(mcp__)?memory__(search|open|read|list|query)'
+        statsLine: true
+        statsTool: false
+        summary:
+          enabled: true
+          everyUserMessages: 10
+          maxOutputTokens: 300
+          provider: ''
+          model: ''
+        debug: true

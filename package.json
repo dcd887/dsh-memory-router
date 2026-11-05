@@ -1,0 +1,52 @@
+{
+  "name": "@local/dsh-memory-router",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Token-saving interceptor for DSH tool calls: dedupe cache, executable decision graph (EDG), live session state, and an honest token ledger with a negative-return account.",
+  "exports": {
+    ".": "./index.js"
+  },
+  "meta": {
+    "title": "记忆路由",
+    "description": "状态类问题注入本地交接文件，检索类结果按条数与字数裁剪，并记账省下的 token"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "dsh",
+    "agent",
+    "token-optimization",
+    "harness",
+    "decision-graph",
+    "context-engineering"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dcd887/dsh-memory-router.git"
+  },
+  "homepage": "https://github.com/dcd887/dsh-memory-router#readme",
+  "bugs": {
+    "url": "https://github.com/dcd887/dsh-memory-router/issues"
+  },
+  "files": [
+    "index.js",
+    "lib/",
+    "prompts/",
+    "scripts/",
+    "edg.example.json",
+    "cordis.patch.yml",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "node tests/offline.mjs && node tests/hooks.mjs && node tests/dedupe.mjs && node tests/edg.mjs && node tests/live.mjs && node tests/inject.mjs",
+    "stats": "node scripts/stats.mjs",
+    "ab": "node scripts/ab.mjs"
+  }
+}

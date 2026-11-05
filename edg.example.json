@@ -1,0 +1,57 @@
+{
+  "note": "EDG 决策图。改完要重启 DSH 才生效（刻意如此，避免半截配置生效）。节点按顺序试，第一个匹配且守卫为真的生效。",
+  "nodes": [
+    {
+      "id": "tax-table-pick-fields",
+      "comment": "税则通那种大表：模型只要几个字段，别把 8972 条全喂进去",
+      "match": { "tool": "read", "args": { "file_path": { "$re": "hs_codes" } } },
+      "guard": { "minChars": 2000 },
+      "then": [
+        { "act": "readJson", "path": "${args.file_path}", "limit": 3, "pick": ["hs_code", "name", "import_tariff", "category"] }
+      ],
+      "terminal": false
+    },
+    {
+      "id": "blind-push-summary",
+      "comment": "盲推记录：只看结论与卡点，不要整篇上万字",
+      "match": { "tool": "read", "args": { "file_path": { "$re": "盲推" } } },
+      "guard": { "minChars": 4000 },
+      "then": [
+        { "act": "grep", "path": "${args.file_path}", "pattern": "^#{1,3} |错误|失败|结论|凶手", "maxLines": 40 },
+        { "act": "stat", "path": "${args.file_path}" }
+      ],
+      "terminal": false
+    },
+    {
+      "id": "verdict-json-digest",
+      "comment": "判案/构建的产出：只抓错误与通过数",
+      "match": { "tool": "read", "args": { "file_path": { "$re": "result|report|判案|构建" } } },
+      "guard": { "all": [ { "minChars": 3000 }, { "regex": "错误|error|通过|pass|失败" } ] },
+      "then": [
+        { "act": "grep", "path": "${args.file_path}", "pattern": "错误|error|通过|失败|count|total", "maxLines": 30 }
+      ],
+      "terminal": false
+    },
+    {
+      "id": "grep-json-when-huge",
+      "comment": "读大 JSON 又只想看某几个键：按正则抓行，不整份返回",
+      "match": { "tool": "read", "args": { "file_path": { "$re": "\\.json$" } } },
+      "guard": { "all": [ { "minChars": 8000 } ] },
+      "then": [
+        { "act": "grep", "path": "${args.file_path}", "pattern": "hs_code|\"name\"|status|error", "maxLines": 40 }
+      ],
+      "terminal": false
+    },
+    {
+      "id": "md-outline-when-huge",
+      "comment": "读很长的 md，先给标题骨架，别整篇塞进去",
+      "match": { "tool": "read", "args": { "file_path": { "$re": "\\.md$" } } },
+      "guard": { "all": [ { "minChars": 8000 } ] },
+      "then": [
+        { "act": "grep", "path": "${args.file_path}", "pattern": "^#{1,3} ", "maxLines": 50 },
+        { "act": "stat", "path": "${args.file_path}" }
+      ],
+      "terminal": false
+    }
+  ]
+}
