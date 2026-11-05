@@ -60,7 +60,7 @@ HarnessMM（arXiv 2610.32813）把这类浪费称为「工具反馈后的无效�
 ## 安装
 
 ```bash
-git clone https://github.com/<you>/dsh-memory-router.git
+git clone https://github.com/dcd887/dsh-memory-router.git
 cd dsh-memory-router && npm test      # 6 个测试套件，92 项
 ```
 
