@@ -239,6 +239,69 @@
         }
       ],
       "terminal": false
+    },
+    {
+      "id": "pytest-output-digest",
+      "comment": "跑完测试读完整输出：只留失败行与汇总行",
+      "match": {
+        "tool": "read",
+        "args": {
+          "file_path": {
+            "$re": "(pytest|pytest_out|test.*\\.log)$"
+          }
+        }
+      },
+      "guard": {
+        "all": [
+          {
+            "minChars": 3000
+          },
+          {
+            "regex": "passed|failed|FAILED|PASSED"
+          }
+        ]
+      },
+      "then": [
+        {
+          "act": "grep",
+          "path": "${args.file_path}",
+          "pattern": "FAILED|ERROR|failed|passed|error|warnings summary",
+          "maxLines": 40
+        },
+        {
+          "act": "stat",
+          "path": "${args.file_path}"
+        }
+      ],
+      "terminal": false
+    },
+    {
+      "id": "git-diff-stat-only",
+      "comment": "读 diff：只要文件与增删行数，不要整份补丁",
+      "match": {
+        "tool": "read",
+        "args": {
+          "file_path": {
+            "$re": "\\.(diff|patch)$"
+          }
+        }
+      },
+      "guard": {
+        "minChars": 2000
+      },
+      "then": [
+        {
+          "act": "grep",
+          "path": "${args.file_path}",
+          "pattern": "^\\+\\+\\+ |^--- |^@@|^diff --git",
+          "maxLines": 40
+        },
+        {
+          "act": "stat",
+          "path": "${args.file_path}"
+        }
+      ],
+      "terminal": false
     }
   ]
 }
