@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## 0.1.1 — 2026-11-05
+
+### 新增
+
+- 演示动图 `assets/demo.gif`（21 帧，6031 → 298 的完整过程），README 顶部展示
+- 决策图节点从 5 个扩到 8 个：
+  - `log-errors-only`：日志只取 ERROR/WARN/Traceback 行（实测 15,891 → 158 字）
+  - `csv-head-only`：大 CSV 只取表头与前三行（实测 10,594 → 105 字）
+  - `package-json-summary`：package.json 只取 name/version/license（实测 1,732 → 98 字）
+
+### 修正
+
+- `package-json-summary` 第一版把 900 字 description 也带进摘要，进出字数反而变大（1002 → 1015）。收窄取字段并把守卫提到 1500 字后修正为 1,732 → 98。
+
 ## 0.1.0 — 2026-11-05
 
 首个可运行版本。对标 HarnessMM（arXiv 2610.32813）的 EDG / GDR / CCS 三机制，在 DSH 上做等价实现。
