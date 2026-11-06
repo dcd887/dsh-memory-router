@@ -30,7 +30,7 @@ fs.writeFileSync(bigMd, Array.from({ length: 3000 }, (_, i) => (i % 50 === 0 ? '
 
 /* ---- 单元：match / guard ---- */
 const edg = loadEdg(path.join('C:/Users/kjds/Desktop/DSH输出/memory-router', 'edg.example.json'));
-ok('示例图能载入', edg.nodes.length === 5, 'nodes=' + edg.nodes.length + ' err=' + edg.error);
+ok('示例图能载入', edg.nodes.length === 10, 'nodes=' + edg.nodes.length + ' err=' + edg.error);
 
 const n1 = edg.nodes[0];
 ok('match: 命中 hs_codes 路径', matchNode(n1, 'read', JSON.stringify({ file_path: bigJson })));
