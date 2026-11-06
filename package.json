@@ -1,6 +1,6 @@
 {
   "name": "@local/dsh-memory-router",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "description": "Token-saving interceptor for DSH tool calls: dedupe cache, executable decision graph (EDG), live session state, and an honest token ledger with a negative-return account.",
   "exports": {
