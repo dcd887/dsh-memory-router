@@ -182,7 +182,7 @@ lib/dedupe.js       哈希 + TTL LRU 缓存
 lib/edg.js          决策图载入、匹配、守卫求值、本地动作
 lib/live_state.js   会话延续状态
 lib/metrics.js      CCS 记账
-edg.example.json    八个节点的示例决策图
+edg.example.json    十个节点的示例决策图
 scripts/stats.mjs   账本汇总
 scripts/ab.mjs      十案例 A/B（可复现）
 tests/              6 套 92 项
