@@ -82,7 +82,7 @@
  "savedTokens":1582,"terminal":false,"turnsAvoided":0}
 ```
 
-`turnsAvoided` 只在 terminal 节点记 1。当前 5 个节点全是 terminal=false，所以这一列一律 0——宁可少报。
+`turnsAvoided` 只在 terminal 节点记 1。当前 8 个节点全是 terminal=false，所以这一列一律 0——宁可少报。
 
 ## 3 安全边界（三条硬约束）
 
