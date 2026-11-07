@@ -40,7 +40,11 @@ const DEFAULTS = {
   // 会话延续器：自动落盘「在处理什么、动过哪些文件」，新会话第一轮注入
   liveState: { enabled: true, file: '', maxFiles: 20, maxUser: 5, staleHours: 24, preferOverHandoff: true },
   // 注入开销控制：同样的内容别每回合重灌；账面一行 30 分钟才带一次
-  inject: { ttlMs: 10 * 60 * 1000, maxChars: 1600, statsEveryMs: 30 * 60 * 1000 },
+  inject: { ttlMs: 10 * 60 * 1000, maxChars: 1600, statsEveryMs: 30 * 60 * 1000,
+            // 只在会话开头注入：省掉中后期那些「看起来像问状态」的回合
+            firstTurns: 0,        // >0 时只在前 N 条用户消息里注入
+            oncePerSession: false, // true 时每个会话只注入一次
+            strictState: false },  // true 时只认 intent==='state'，不认 mixed
   // 压缩阈值：省得太少就别压。压过头会让模型重读，那是净亏（见 metrics 的 reread）
   trim: { enabled: true, dryRun: true, maxItems: 2, maxChars: 500, minSavedChars: 200, minSavedRatio: 0.15,
           toolPattern: '^(mcp__)?memory__(search|open|read|list|query|query)' },
@@ -159,7 +163,7 @@ export function apply(ctx, config = {}) {
     const key = String(agentId || 'unknown');
     let st = states.get(key);
     if (!st) {
-      st = { intent: 'none', at: 0, turn: -1, step: -1, injectedTurn: null, userCount: 0, hits: [],
+      st = { intent: 'none', at: 0, turn: -1, step: -1, injectedTurn: null, injectedSession: false, userCount: 0, hits: [],
              lastHash: '', lastAt: 0, lastStatsAt: 0 };
       states.set(key, st);
     }
@@ -213,6 +217,7 @@ export function apply(ctx, config = {}) {
     st.lastHash = h;
     st.lastAt = now;
     st.injectedTurn = st.turn;
+    st.injectedSession = true;
     const line = statsLineMaybe(st);
     const out = line ? capped + '\n\n' + line : capped;
     metrics.inject(meta.target || 'state', out, { agent: String(agentId).slice(0, 8), coreChars: capped.length, withStats: !!line, ...meta });
@@ -240,6 +245,9 @@ export function apply(ctx, config = {}) {
     if (!st.at) return '';
     if (Date.now() - st.at > cfg.stateTtlMs) return '';
     if (st.intent !== 'state' && st.intent !== 'mixed') return '';
+    if (cfg.inject.strictState && st.intent !== 'state') return '';
+    if (cfg.inject.firstTurns > 0 && (st.userCount || 0) > cfg.inject.firstTurns) return '';
+    if (cfg.inject.oncePerSession && st.injectedSession) return '';
     if (cfg.injectOncePerTurn && st.injectedTurn === st.turn) return '';
 
     // 先看会话延续状态：比交接文档新、且够近，就优先用它（这样开新会话不用再写交接）
