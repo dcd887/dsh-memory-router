@@ -3,7 +3,7 @@
 > 一个挂在 DSH 工具调用边界上的 Token 压缩插件：把模型「已经读过一次的东西」和「读不完的长输出」在进入上下文之前处理掉，并把省下的 token 记成账。
 
 ![Node](https://img.shields.io/badge/node-%3E%3D18-3c873a)
-![Tests](https://img.shields.io/badge/tests-92%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-96%20passing-brightgreen)
 ![Status](https://img.shields.io/badge/status-alpha-orange)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
@@ -93,6 +93,37 @@ ln -s /path/to/dsh-memory-router ~/.dsh/profiles/web/node_modules/@local/dsh-mem
 守卫只有五个纯本地算子（`exitCode` / `fileExists` / `regex` / `minChars` / `jsonPath`），动作只有四个只读动作（`readJson` / `readFileSlice` / `grep` / `stat`）。写 `exec` 会直接抛错——决策图写错，最坏结果是退化成没有它。
 
 ---
+
+## 注入闸门（0.1.3）
+
+「状态注入」是这套插件里唯一会主动往上下文里塞东西的模块，所以它也是唯一可能变成负收益的模块。
+
+实测（7 天、87 次注入）：注入花掉 21,945 token，同期压缩只省下 4,238，净亏 17,707。
+
+原因是它把「每一条看起来像在问进度的话」都当成注入时机，同一段状态被反复灌了 87 次；而它的真实价值只在**开新会话那一次**。
+
+0.1.3 给了三个闸门，默认值保持旧行为，不破坏已有配置：
+
+| 配置项 | 默认 | 作用 |
+|---|---|---|
+| `inject.firstTurns` | `0` | 大于 0 时，只在会话前 N 条用户消息里注入 |
+| `inject.oncePerSession` | `false` | 为真时，每个会话最多注入一次 |
+| `inject.strictState` | `false` | 为真时只认 `intent === 'state'`，不把 `mixed` 算进来 |
+
+推荐档位（既保住「新会话自动带上次进度」，又把开销压到十分之一）：
+
+```yaml
+injectMode: 'context'
+inject:
+  firstTurns: 2
+  oncePerSession: true
+  strictState: true
+  maxChars: 500
+```
+
+同一批使用强度下的估算：注入从 87 次 / 21,945 token，降到每会话最多 1 次 / 约 130 token。
+
+闸门有专门的自测：`tests/inject-gate.mjs`（首条注入、二次不重复、第三条不注入、mixed 不注入）。
 
 ## 局限（请先读完这段再决定要不要 Star）
 
