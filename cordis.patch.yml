@@ -1,5 +1,14 @@
 # 记忆路由：Host 插件一行即可。它不新增 MCP 行，
 # 因为它包住的是已有的 mcp-memory（serverName: memory），不改那个行。
+#
+# 2026-11-07 调整：账本显示 7 天省 4,238、注入花 21,945，净亏 17,707。
+#   2026-11-07 第二轮：不是关掉注入，而是给它加闸门——
+#     firstTurns: 2        只在新会话头两条消息注入（原来中后期每轮都可能注入）
+#     oncePerSession: true 每会话最多一次（原来每回合都可能来一次）
+#     strictState: true    只认严格「问进度」意图（原来连 mixed 也算，占了 50 次）
+#     maxChars: 500        注入正文上限（原来 1600）
+#   预期：每会话最多 2 次注入 ≈ 200 token，换来「新会话自动带上次进度」
+#   回滚：cordis.patch.yml.bak-20261107
 - insert:
     - id: memory-router
       name: '@local/dsh-memory-router'
@@ -9,7 +18,7 @@
         handoffGlob: '交接_*.md'
         stateChars: 1800
         stateTtlMs: 600000
-        injectMode: context
+        injectMode: 'context'
         injectOncePerTurn: true
         trim:
           enabled: true
@@ -19,10 +28,16 @@
           # 只裁「读」类工具。写类（create_entities / add_observations / delete_*）
           # 的返回是确认回执，裁它没有意义，还可能让模型误判写没写成功。
           toolPattern: '^(mcp__)?memory__(search|open|read|list|query)'
+        inject:
+          firstTurns: 2          # 只在新会话的头两条用户消息里注入
+          oncePerSession: true   # 每个会话最多注入一次
+          strictState: true      # 只认「问上次进度」这类严格意图，不认 mixed
+          maxChars: 500          # 注入正文最多 500 字，旧的 1600 太肥
+          ttlMs: 600000
         statsLine: true
         statsTool: false
         summary:
-          enabled: true
+          enabled: false
           everyUserMessages: 10
           maxOutputTokens: 300
           provider: ''
