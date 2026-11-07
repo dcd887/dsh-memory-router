@@ -1,6 +1,6 @@
 {
   "name": "@local/dsh-memory-router",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "type": "module",
   "description": "Token-saving interceptor for DSH tool calls: dedupe cache, executable decision graph (EDG), live session state, and an honest token ledger with a negative-return account.",
   "exports": {
@@ -45,7 +45,7 @@
     "README.md"
   ],
   "scripts": {
-    "test": "node tests/offline.mjs && node tests/hooks.mjs && node tests/dedupe.mjs && node tests/edg.mjs && node tests/live.mjs && node tests/inject.mjs",
+    "test": "node tests/offline.mjs && node tests/hooks.mjs && node tests/dedupe.mjs && node tests/edg.mjs && node tests/live.mjs && node tests/inject.mjs && node tests/inject-gate.mjs",
     "stats": "node scripts/stats.mjs",
     "ab": "node scripts/ab.mjs"
   }
